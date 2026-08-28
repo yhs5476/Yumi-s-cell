@@ -1,0 +1,6 @@
+{
+  "name": "케어매치",
+  "description": "간병인 및 요양보호사 탐색, 조건별 필터링, 상세 프로필 조회 및 1:1 지정 간병 신청 매칭 플랫폼",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
