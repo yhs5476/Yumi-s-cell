@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="toss_blue">#3182F6</color>
+    <color name="toss_bg">#F2F4F6</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#191F28</color>
+</resources>
