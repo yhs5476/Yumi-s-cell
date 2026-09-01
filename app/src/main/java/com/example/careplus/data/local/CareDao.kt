@@ -80,6 +80,9 @@ interface CareDao {
     @Query("UPDATE contracts SET isReviewed = 1, ratingGiven = :rating, reviewComment = :comment WHERE contractId = :contractId")
     suspend fun submitReview(contractId: Long, rating: Float, comment: String)
 
+    @Query("DELETE FROM contracts WHERE contractId = :contractId")
+    suspend fun deleteContractById(contractId: Long)
+
     @Query("DELETE FROM contracts")
     suspend fun deleteAllContracts()
 

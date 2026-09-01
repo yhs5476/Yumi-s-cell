@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.SwapHoriz
@@ -38,6 +39,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -82,7 +84,8 @@ fun HomeScreen(
     onNavigateToRequestForm: (CareType) -> Unit,
     onNavigateToBidFeed: (Long) -> Unit,
     onNavigateToContracts: () -> Unit,
-    onNavigateToRadar: () -> Unit
+    onNavigateToRadar: () -> Unit,
+    onNavigateToMyPage: () -> Unit = {}
 ) {
     val role by viewModel.currentRole.collectAsState()
     val location by viewModel.currentLocation.collectAsState()
@@ -189,27 +192,44 @@ fun HomeScreen(
                         }
                     }
 
-                    // Role Switch Button
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(if (role == UserRole.GUARDIAN) TossBlueLight else TossGreenLight)
-                            .clickable { viewModel.toggleRole() }
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        // Role Switch Button
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(if (role == UserRole.GUARDIAN) TossBlueLight else TossGreenLight)
+                                .clickable { viewModel.toggleRole() }
+                                .padding(horizontal = 10.dp, vertical = 6.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.SwapHoriz,
+                                    contentDescription = "역할 전환",
+                                    tint = if (role == UserRole.GUARDIAN) TossBlue else TossGreen,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = if (role == UserRole.GUARDIAN) "보호자" else "간병인",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (role == UserRole.GUARDIAN) TossBlue else TossGreen
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(6.dp))
+
+                        // My Page Icon Button
+                        IconButton(
+                            onClick = onNavigateToMyPage,
+                            modifier = Modifier.size(36.dp)
+                        ) {
                             Icon(
-                                imageVector = Icons.Default.SwapHoriz,
-                                contentDescription = "역할 전환",
-                                tint = if (role == UserRole.GUARDIAN) TossBlue else TossGreen,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = if (role == UserRole.GUARDIAN) "보호자 모드" else "간병인 모드",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (role == UserRole.GUARDIAN) TossBlue else TossGreen
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "마이페이지",
+                                tint = TossBlack,
+                                modifier = Modifier.size(24.dp)
                             )
                         }
                     }

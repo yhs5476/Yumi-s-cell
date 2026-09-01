@@ -254,6 +254,12 @@ class CarePlusViewModel(private val repository: CarePlusRepository) : ViewModel(
         }
     }
 
+    fun deleteContract(contractId: Long) {
+        viewModelScope.launch {
+            repository.deleteContract(contractId)
+        }
+    }
+
     fun completeAndResetCycle(onResetComplete: () -> Unit = {}) {
         viewModelScope.launch {
             repository.completeAndResetCycle()

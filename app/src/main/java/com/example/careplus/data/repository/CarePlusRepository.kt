@@ -130,6 +130,10 @@ class CarePlusRepository(private val careDao: CareDao) {
         careDao.submitReview(contractId, rating, comment)
     }
 
+    suspend fun deleteContract(contractId: Long) {
+        careDao.deleteContractById(contractId)
+    }
+
     suspend fun completeAndResetCycle() {
         careDao.deleteAllContracts()
         careDao.deleteAllRequests()

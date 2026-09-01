@@ -23,6 +23,7 @@ import com.example.careplus.ui.screens.CaregiverRadarScreen
 import com.example.careplus.ui.screens.ChatScreen
 import com.example.careplus.ui.screens.ContractDetailScreen
 import com.example.careplus.ui.screens.HomeScreen
+import com.example.careplus.ui.screens.MyPageScreen
 import com.example.careplus.ui.screens.RequestFormScreen
 import com.example.careplus.ui.theme.CarePlusTheme
 import com.example.careplus.ui.theme.TossBackground
@@ -98,6 +99,9 @@ fun CarePlusApp(viewModel: CarePlusViewModel) {
                 },
                 onNavigateToRadar = {
                     navController.navigate("caregiver_radar")
+                },
+                onNavigateToMyPage = {
+                    navController.navigate("my_page")
                 }
             )
         }
@@ -157,6 +161,16 @@ fun CarePlusApp(viewModel: CarePlusViewModel) {
             CaregiverRadarScreen(
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable("my_page") {
+            MyPageScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+                onNavigateToContracts = {
+                    navController.navigate("contracts")
+                }
             )
         }
     }

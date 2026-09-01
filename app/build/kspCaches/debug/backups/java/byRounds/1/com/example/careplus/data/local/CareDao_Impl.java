@@ -66,6 +66,8 @@ public final class CareDao_Impl implements CareDao {
 
   private final SharedSQLiteStatement __preparedStmtOfSubmitReview;
 
+  private final SharedSQLiteStatement __preparedStmtOfDeleteContractById;
+
   private final SharedSQLiteStatement __preparedStmtOfDeleteAllContracts;
 
   private final SharedSQLiteStatement __preparedStmtOfDeleteAllRequests;
@@ -298,6 +300,14 @@ public final class CareDao_Impl implements CareDao {
       @NonNull
       public String createQuery() {
         final String _query = "UPDATE contracts SET isReviewed = 1, ratingGiven = ?, reviewComment = ? WHERE contractId = ?";
+        return _query;
+      }
+    };
+    this.__preparedStmtOfDeleteContractById = new SharedSQLiteStatement(__db) {
+      @Override
+      @NonNull
+      public String createQuery() {
+        final String _query = "DELETE FROM contracts WHERE contractId = ?";
         return _query;
       }
     };
@@ -571,6 +581,32 @@ public final class CareDao_Impl implements CareDao {
           }
         } finally {
           __preparedStmtOfSubmitReview.release(_stmt);
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object deleteContractById(final long contractId,
+      final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        final SupportSQLiteStatement _stmt = __preparedStmtOfDeleteContractById.acquire();
+        int _argIndex = 1;
+        _stmt.bindLong(_argIndex, contractId);
+        try {
+          __db.beginTransaction();
+          try {
+            _stmt.executeUpdateDelete();
+            __db.setTransactionSuccessful();
+            return Unit.INSTANCE;
+          } finally {
+            __db.endTransaction();
+          }
+        } finally {
+          __preparedStmtOfDeleteContractById.release(_stmt);
         }
       }
     }, $completion);
