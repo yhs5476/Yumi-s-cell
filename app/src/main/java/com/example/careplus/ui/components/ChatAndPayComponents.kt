@@ -388,7 +388,7 @@ fun TossPayBottomSheet(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "간병이 끝날 때까지 케어플러스가 비용을 안전하게 보관해요.",
+                    text = "간병이 끝날 때까지 포도당이 비용을 안전하게 보관해요.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = TossGray,
                     textAlign = TextAlign.Center

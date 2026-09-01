@@ -4,17 +4,73 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+
     <group
-        android:scaleX="0.75"
-        android:scaleY="0.75"
-        android:translateX="13.5"
-        android:translateY="13.5">
-        <!-- Plus / Heart medical shield cross icon in pure white -->
+        android:scaleX="0.82"
+        android:scaleY="0.82"
+        android:translateX="9.72"
+        android:translateY="9.72">
+
+        <!-- 1. IV Drip Bag Hanger Top Ring -->
+        <path
+            android:fillColor="#7158E2"
+            android:pathData="M50,14 C50,11.8 51.8,10 54,10 C56.2,10 58,11.8 58,14 L58,18 L50,18 Z" />
         <path
             android:fillColor="#FFFFFF"
-            android:pathData="M54,12 C30.8,12 12,30.8 12,54 C12,77.2 30.8,96 54,96 C77.2,96 96,77.2 96,54 C96,30.8 77.2,12 54,12 Z M54,88 C35.2,88 20,72.8 20,54 C20,35.2 35.2,20 54,20 C72.8,20 88,35.2 88,54 C88,72.8 72.8,88 54,88 Z"/>
+            android:pathData="M52,14 C52,12.9 52.9,12 54,12 C55.1,12 56,12.9 56,14 L56,16 L52,16 Z" />
+
+        <!-- 2. IV Drip Bag Main Frame (Rounded Rectangle Outline) -->
+        <path
+            android:fillColor="#7158E2"
+            android:pathData="M34,20 C28.5,20 24,24.5 24,30 L24,72 C24,77.5 28.5,82 34,82 L74,82 C79.5,82 84,77.5 84,72 L84,30 C84,24.5 79.5,20 74,20 Z" />
+
+        <!-- Inner White Cutout -->
         <path
             android:fillColor="#FFFFFF"
-            android:pathData="M48,34 L60,34 L60,48 L74,48 L74,60 L60,60 L60,74 L48,74 L48,60 L34,60 L34,48 L48,48 Z"/>
+            android:pathData="M35.5,25 C31.4,25 28,28.4 28,32.5 L28,69.5 C28,73.6 31.4,77 35.5,77 L72.5,77 C76.6,77 80,73.6 80,69.5 L80,32.5 C80,28.4 76.6,25 72.5,25 Z" />
+
+        <!-- 3. Bottom Drip Chamber Connector & Tube -->
+        <path
+            android:fillColor="#7158E2"
+            android:pathData="M50,82 L58,82 L58,90 L50,90 Z" />
+        <path
+            android:fillColor="#5A42C8"
+            android:pathData="M51.5,90 L56.5,90 L55,97 L53,97 Z" />
+
+        <!-- 4. Stacked Single Syllable Character '폳' style (Top: ㅍ, Middle: ㄷ, Bottom 받침: ㄷ) -->
+
+        <!-- [Top: ㅍ] (Width matched to ㄷ: X 41 ~ 67, Y: 32 ~ 45, Bold 4dp Stroke) -->
+        <!-- ㅍ Top Bar -->
+        <path
+            android:fillColor="#7158E2"
+            android:pathData="M41,32 L67,32 C68.1,32 69,32.9 69,34 C69,35.1 68.1,36 67,36 L41,36 C39.9,36 39,35.1 39,34 C39,32.9 39.9,32 41,32 Z" />
+        <!-- ㅍ Left Stem -->
+        <path
+            android:fillColor="#7158E2"
+            android:pathData="M46,36 L50,36 L50,42 L46,42 Z" />
+        <!-- ㅍ Right Stem -->
+        <path
+            android:fillColor="#7158E2"
+            android:pathData="M58,36 L62,36 L62,42 L58,42 Z" />
+        <!-- ㅍ Bottom Bar -->
+        <path
+            android:fillColor="#7158E2"
+            android:pathData="M41,41 L67,41 C68.1,41 69,41.9 69,43 C69,44.1 68.1,45 67,45 L41,45 C39.9,45 39,44.1 39,43 C39,41.9 39.9,41 41,41 Z" />
+
+        <!-- [Middle: ㄷ] (X: 41 ~ 67, Y: 49 ~ 60, Bold 4dp Stroke) -->
+        <path
+            android:fillColor="#7158E2"
+            android:pathData="M41,49 L67,49 C68.1,49 69,49.9 69,51 C69,52.1 68.1,53 67,53 L45,53 L45,56 L67,56 C68.1,56 69,56.9 69,58 C69,59.1 68.1,60 67,60 L41,60 C39.9,60 39,59.1 39,58 L39,51 C39,49.9 39.9,49 41,49 Z" />
+
+        <!-- [Bottom 받침: ㄷ] (X: 41 ~ 67, Y: 63 ~ 74, Bold 4dp Stroke) -->
+        <path
+            android:fillColor="#7158E2"
+            android:pathData="M41,63 L67,63 C68.1,63 69,63.9 69,65 C69,66.1 68.1,67 67,67 L45,67 L45,70 L67,70 C68.1,70 69,70.9 69,72 C69,73.1 68.1,74 67,74 L41,74 C39.9,74 39,73.1 39,72 L39,65 C39,63.9 39.9,63 41,63 Z" />
+
+        <!-- Liquid Level Accent Line & Drip -->
+        <path
+            android:fillColor="#8C7AE6"
+            android:pathData="M71,72 C72.1,72 73,72.9 73,74 C73,75.1 72.1,76 71,76 C69.9,76 69,75.1 69,74 C69,72.9 69.9,72 71,72 Z" />
+
     </group>
 </vector>

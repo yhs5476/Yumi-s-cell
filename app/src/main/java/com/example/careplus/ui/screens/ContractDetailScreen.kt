@@ -148,7 +148,7 @@ fun ContractDetailScreen(
                         Spacer(modifier = Modifier.width(14.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "케어플러스 안심 에스크로",
+                                text = "포도당 안심 에스크로",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )

@@ -1,5 +1,5 @@
 {
-  "name": "케어플러스",
+  "name": "포도당",
   "description": "위치 기반 실시간 돌봄 입찰 및 토스 스타일 안심 간병 매칭 플랫폼",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

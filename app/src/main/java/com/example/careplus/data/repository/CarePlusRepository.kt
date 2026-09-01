@@ -98,7 +98,7 @@ class CarePlusRepository(private val careDao: CareDao) {
             ChatMessageEntity(
                 bidId = bidId,
                 senderRole = "SYSTEM",
-                senderName = "케어플러스 안심 결제",
+                senderName = "포도당 안심 결제",
                 content = "토스페이로 ${String.format("%,d", totalPrice)}원 결제가 완료되었습니다. 간병 종료 시까지 안심 에스크로 금고에 안전하게 보관됩니다.",
                 isInvoice = false
             )

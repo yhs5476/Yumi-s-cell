@@ -457,7 +457,7 @@ fun HomeScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "케어플러스 3대 안심 보증",
+                                    text = "포도당 3대 안심 보증",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = TossBlack
