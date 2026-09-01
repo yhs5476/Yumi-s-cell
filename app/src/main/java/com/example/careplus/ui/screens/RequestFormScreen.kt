@@ -173,10 +173,11 @@ fun RequestFormScreen(
                     .background(TossSurface)
                     .navigationBarsPadding()
                     .imePadding()
-                    .padding(horizontal = 20.dp, vertical = 14.dp)
+                    .padding(horizontal = 20.dp, vertical = 14.dp),
+                contentAlignment = Alignment.CenterEnd
             ) {
                 TossButton(
-                    text = if (currentStep < 3) "다음 ($currentStep/3)" else "공고 등록하고 실시간 견적 받기",
+                    text = if (currentStep < 3) "다음 ($currentStep/3)" else "공고 등록하고 실시간 견적 받기 🚀",
                     onClick = {
                         if (currentStep < 3) {
                             currentStep += 1
@@ -186,6 +187,7 @@ fun RequestFormScreen(
                             }
                         }
                     },
+                    modifier = if (currentStep < 3) Modifier.width(160.dp) else Modifier.fillMaxWidth(),
                     testTag = "btn_next_step"
                 )
             }

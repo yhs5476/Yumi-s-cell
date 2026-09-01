@@ -58,6 +58,11 @@ class CareConverters {
     fun toEscrowStatus(value: String): EscrowStatus = EscrowStatus.valueOf(value)
 
     @TypeConverter
+    fun fromJourneyStep(value: com.example.careplus.data.model.JourneyStep): String = value.name
+    @TypeConverter
+    fun toJourneyStep(value: String): com.example.careplus.data.model.JourneyStep = com.example.careplus.data.model.JourneyStep.valueOf(value)
+
+    @TypeConverter
     fun fromStringList(list: List<String>): String = list.joinToString(";;")
     @TypeConverter
     fun toStringList(data: String): List<String> = if (data.isEmpty()) emptyList() else data.split(";;")

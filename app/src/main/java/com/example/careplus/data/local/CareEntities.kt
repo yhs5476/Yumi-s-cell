@@ -7,6 +7,7 @@ import com.example.careplus.data.model.BidStatus
 import com.example.careplus.data.model.CareType
 import com.example.careplus.data.model.Consciousness
 import com.example.careplus.data.model.EscrowStatus
+import com.example.careplus.data.model.JourneyStep
 import com.example.careplus.data.model.Mobility
 import com.example.careplus.data.model.PatientGender
 import com.example.careplus.data.model.RequestStatus
@@ -46,6 +47,7 @@ data class CaregiverProfileEntity(
     val vaccineYn: Boolean,
     val gender: PatientGender,
     val bio: String,
+    val brixScore: Float = 14.5f,
     val phoneMasked: String = "010-****-5829"
 )
 
@@ -66,6 +68,7 @@ data class CareBidEntity(
     val gender: PatientGender,
     val pitchMessage: String,
     val dailyPrice: Int,
+    val brixScore: Float = 14.5f,
     val status: BidStatus = BidStatus.PENDING,
     val createdAt: Long = System.currentTimeMillis()
 )
@@ -99,6 +102,8 @@ data class ContractEntity(
     val platformFee: Int,
     val totalPrice: Int,
     val escrowStatus: EscrowStatus = EscrowStatus.HOLDING,
+    val journeyStep: JourneyStep = JourneyStep.DEPARTURE,
+    val shareToken: String = "PODODANG-SHARE-${System.currentTimeMillis()}",
     val isReviewed: Boolean = false,
     val ratingGiven: Float = 0f,
     val reviewComment: String = "",

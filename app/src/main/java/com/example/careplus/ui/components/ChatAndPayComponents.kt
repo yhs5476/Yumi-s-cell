@@ -333,8 +333,9 @@ fun InvoiceCard(
             Spacer(modifier = Modifier.height(18.dp))
 
             TossButton(
-                text = "토스페이로 1초 만에 결제하기",
+                text = "토스페이로 1초 만에 결제하기 ⚡",
                 onClick = onPayClick,
+                modifier = Modifier.fillMaxWidth(),
                 testTag = "pay_invoice_button"
             )
         }

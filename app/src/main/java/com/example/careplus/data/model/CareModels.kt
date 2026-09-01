@@ -58,3 +58,41 @@ enum class EscrowStatus(val label: String, val colorHex: Long) {
     RELEASED("정산 완료", 0xFF00C473),
     REFUNDED("환불 완료", 0xFFF04452)
 }
+
+enum class JourneyStep(val stepNumber: Int, val title: String, val desc: String, val emoji: String) {
+    DEPARTURE(1, "출발 완료", "동행/케어 매니저 이동 시작", "🚗"),
+    HOSPITAL_ARRIVED(2, "병원 도착", "접수처 도착 및 본인 확인", "🏥"),
+    TREATMENT_IN_PROGRESS(3, "진료/수납", "외래 진료 및 검사 동행", "🩺"),
+    PHARMACY_VISITED(4, "약국 수령", "처방전 접수 및 복약 지도", "💊"),
+    RETURNING_HOME(5, "귀가 진행", "환자 자택/병동 안전 복귀", "🏠"),
+    COMPLETED(6, "케어 완료", "리포트 자동 발급 및 에스크로 정산", "✅")
+}
+
+@Serializable
+data class CareReportData(
+    val summary: String,
+    val treatmentNotes: String,
+    val nextAppointment: String,
+    val medicationInfo: String,
+    val guardianAlerts: String,
+    val shareToken: String
+)
+
+data class BrixInfo(
+    val brixScore: Float,
+    val tierName: String,
+    val emoji: String,
+    val badgeColorHex: Long,
+    val isTopTier: Boolean
+)
+
+fun getBrixInfo(score: Float): BrixInfo {
+    val clamped = score.coerceIn(0.0f, 24.0f)
+    return when {
+        clamped >= 18.1f -> BrixInfo(clamped, "명품 샤인머스캣", "✨🍇", 0xFF8B5CF6, true)
+        clamped >= 15.1f -> BrixInfo(clamped, "진한 머스캣", "🍇", 0xFF059669, false)
+        clamped >= 12.0f -> BrixInfo(clamped, "달콤한 캠벨포도", "🍇", 0xFF3182F6, false)
+        else -> BrixInfo(clamped, "새콤한 청포도", "🍇", 0xFF6B7684, false)
+    }
+}
+

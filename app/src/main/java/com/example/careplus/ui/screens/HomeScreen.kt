@@ -223,8 +223,74 @@ fun HomeScreen(
                 }
             }
 
-            // Active Request Banner (if any exists)
-            if (activeRequest != null && role == UserRole.GUARDIAN) {
+            // Active Contract Door-to-Door Banner (if any contract exists)
+            val activeContract = contracts.firstOrNull()
+            if (activeContract != null && role == UserRole.GUARDIAN) {
+                item {
+                    Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+                        TossCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            backgroundColor = Color(0xFF6D28D9),
+                            onClick = { onNavigateToContracts() }
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(20.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(6.dp))
+                                                .background(TossSurface.copy(alpha = 0.25f))
+                                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                                        ) {
+                                            Text(
+                                                text = "🚗 Door-to-Door 트래킹",
+                                                color = TossSurface,
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = activeContract.caregiverName,
+                                            color = TossSurface.copy(alpha = 0.9f),
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = "${activeContract.journeyStep.emoji} 현재 단계: ${activeContract.journeyStep.title}",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = TossSurface
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "터치하여 6단계 트래킹 및 ✨ AI Care Report 확인 👉",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = TossSurface.copy(alpha = 0.85f)
+                                    )
+                                }
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    tint = TossSurface,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Active Request Bidding Banner (Only if no active contract matched yet)
+            if (activeRequest != null && activeContract == null && role == UserRole.GUARDIAN) {
                 item {
                     Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
                         TossCard(

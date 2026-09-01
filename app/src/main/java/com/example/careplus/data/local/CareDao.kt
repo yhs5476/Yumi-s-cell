@@ -74,6 +74,18 @@ interface CareDao {
     @Query("UPDATE contracts SET escrowStatus = :status WHERE contractId = :contractId")
     suspend fun updateEscrowStatus(contractId: Long, status: EscrowStatus)
 
+    @Query("UPDATE contracts SET journeyStep = :step WHERE contractId = :contractId")
+    suspend fun updateJourneyStep(contractId: Long, step: com.example.careplus.data.model.JourneyStep)
+
     @Query("UPDATE contracts SET isReviewed = 1, ratingGiven = :rating, reviewComment = :comment WHERE contractId = :contractId")
     suspend fun submitReview(contractId: Long, rating: Float, comment: String)
+
+    @Query("DELETE FROM contracts")
+    suspend fun deleteAllContracts()
+
+    @Query("DELETE FROM care_requests")
+    suspend fun deleteAllRequests()
+
+    @Query("DELETE FROM care_bids")
+    suspend fun deleteAllBids()
 }

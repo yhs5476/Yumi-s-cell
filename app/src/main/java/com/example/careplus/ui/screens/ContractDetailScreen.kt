@@ -54,6 +54,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.careplus.data.local.ContractEntity
 import com.example.careplus.data.model.EscrowStatus
+import com.example.careplus.data.model.JourneyStep
+import com.example.careplus.ui.components.AiCareReportBottomSheet
+import com.example.careplus.ui.components.DoorToDoorTimelineCard
 import com.example.careplus.ui.components.TossBadge
 import com.example.careplus.ui.components.TossButton
 import com.example.careplus.ui.components.TossCard
@@ -76,7 +79,9 @@ fun ContractDetailScreen(
     onBack: () -> Unit
 ) {
     val contracts by viewModel.allContracts.collectAsState()
+    val userRole by viewModel.currentRole.collectAsState()
     var selectedContractForReview by remember { mutableStateOf<ContractEntity?>(null) }
+    var selectedContractForReport by remember { mutableStateOf<ContractEntity?>(null) }
     var reviewRating by remember { mutableFloatStateOf(5f) }
     var reviewText by remember { mutableStateOf("병원 시스템에도 능숙하시고 석션과 기저귀 케어 모두 정성껏 돌봐주셨습니다. 진심으로 감사드립니다!") }
 
@@ -184,11 +189,24 @@ fun ContractDetailScreen(
                 items(contracts) { contract ->
                     ContractCardItem(
                         contract = contract,
+                        userRole = userRole,
                         onReleaseEscrow = { viewModel.releaseEscrow(contract.contractId) },
-                        onReviewClick = { selectedContractForReview = contract }
+                        onReviewClick = { selectedContractForReview = contract },
+                        onAdvanceStep = { nextStep -> viewModel.updateJourneyStep(contract.contractId, nextStep) },
+                        onViewReportClick = { selectedContractForReport = contract },
+                        onResetCycle = { viewModel.completeAndResetCycle { onBack() } }
                     )
                 }
             }
+        }
+
+        // AI Care Report Bottom Sheet
+        if (selectedContractForReport != null) {
+            val reportData = viewModel.getCareReport(selectedContractForReport!!)
+            AiCareReportBottomSheet(
+                report = reportData,
+                onDismiss = { selectedContractForReport = null }
+            )
         }
 
         // Review Dialog
@@ -249,15 +267,20 @@ fun ContractDetailScreen(
                 confirmButton = {
                     TextButton(
                         onClick = {
+                            val contractId = selectedContractForReview!!.contractId
                             viewModel.submitReview(
-                                contractId = selectedContractForReview!!.contractId,
+                                contractId = contractId,
                                 rating = reviewRating,
                                 comment = reviewText
                             )
                             selectedContractForReview = null
+                            // Reset cycle and navigate back to initial home state for new recruitment
+                            viewModel.completeAndResetCycle {
+                                onBack()
+                            }
                         }
                     ) {
-                        Text("후기 등록", fontWeight = FontWeight.Bold, color = TossBlue)
+                        Text("후기 등록 및 새 모집 시작 🚀", fontWeight = FontWeight.Bold, color = TossBlue)
                     }
                 },
                 dismissButton = {
@@ -275,137 +298,138 @@ fun ContractDetailScreen(
 @Composable
 fun ContractCardItem(
     contract: ContractEntity,
+    userRole: com.example.careplus.data.model.UserRole = com.example.careplus.data.model.UserRole.GUARDIAN,
     onReleaseEscrow: () -> Unit,
-    onReviewClick: () -> Unit
+    onReviewClick: () -> Unit,
+    onAdvanceStep: (JourneyStep) -> Unit,
+    onViewReportClick: () -> Unit,
+    onResetCycle: () -> Unit = {}
 ) {
-    TossCard(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        backgroundColor = TossSurface,
-        shape = RoundedCornerShape(22.dp)
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
+        // Door-to-Door Live Timeline Stepper
+        DoorToDoorTimelineCard(
+            currentStep = contract.journeyStep,
+            onAdvanceStep = onAdvanceStep,
+            userRole = userRole
+        )
+
+        TossCard(
+            modifier = Modifier.fillMaxWidth(),
+            backgroundColor = TossSurface,
+            shape = RoundedCornerShape(22.dp)
         ) {
-            // Status Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.ReceiptLong,
-                        contentDescription = null,
-                        tint = TossBlue,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "계약 번호 #${contract.contractId}",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Bold,
-                        color = TossGray
+                // Status Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.ReceiptLong,
+                            contentDescription = null,
+                            tint = TossBlue,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "계약 번호 #${contract.contractId}",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    TossBadge(
+                        text = contract.escrowStatus.label,
+                        isGreen = contract.escrowStatus == EscrowStatus.RELEASED,
+                        isHighlighted = contract.escrowStatus == EscrowStatus.HOLDING
                     )
                 }
 
-                TossBadge(
-                    text = contract.escrowStatus.label,
-                    isGreen = contract.escrowStatus == EscrowStatus.RELEASED,
-                    isHighlighted = contract.escrowStatus == EscrowStatus.HOLDING
-                )
-            }
+                Spacer(modifier = Modifier.height(14.dp))
+                HorizontalDivider(color = TossBorder)
+                Spacer(modifier = Modifier.height(14.dp))
 
-            Spacer(modifier = Modifier.height(14.dp))
+                // Detail Items
+                ContractDetailRow(label = "담당 케어메이트", value = "${contract.caregiverName} 케어메이트")
+                ContractDetailRow(label = "환자/보호자", value = contract.guardianName)
+                ContractDetailRow(label = "케어 장소", value = contract.location)
+                ContractDetailRow(label = "케어 기간", value = contract.dates)
 
-            Text(
-                text = "${contract.caregiverName} × ${contract.guardianName}",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+                Spacer(modifier = Modifier.height(12.dp))
+                HorizontalDivider(color = TossBorder)
+                Spacer(modifier = Modifier.height(12.dp))
 
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "장소: ${contract.location}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = TossGray
-            )
-            Text(
-                text = "기간: ${contract.dates} (${contract.totalDays}일간)",
-                style = MaterialTheme.typography.bodyMedium,
-                color = TossGray
-            )
+                // Financial Breakdown
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("간병 공급가액 (${String.format("%,d", contract.dailyPrice)}원 × ${contract.totalDays}일)", style = MaterialTheme.typography.bodySmall, color = TossGray)
+                    Text("${String.format("%,d", contract.supplyPrice)}원", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("플랫폼 안심 수수료 (5%)", style = MaterialTheme.typography.bodySmall, color = TossGray)
+                    Text("${String.format("%,d", contract.platformFee)}원", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("총 에스크로 예치금액", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "${String.format("%,d", contract.totalPrice)}원",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = TossBlue
+                    )
+                }
 
-            Spacer(modifier = Modifier.height(14.dp))
-            HorizontalDivider(color = TossBorder)
-            Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // Cost details
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("간병 공급가액 (${String.format("%,d", contract.dailyPrice)}원 × ${contract.totalDays}일)", style = MaterialTheme.typography.bodySmall, color = TossGray)
-                Text("${String.format("%,d", contract.supplyPrice)}원", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("플랫폼 안심 수수료 (5%)", style = MaterialTheme.typography.bodySmall, color = TossGray)
-                Text("${String.format("%,d", contract.platformFee)}원", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("총 에스크로 예치금액", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text(
-                    text = "${String.format("%,d", contract.totalPrice)}원",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = TossBlue
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Actions based on escrow status
-            if (contract.escrowStatus == EscrowStatus.HOLDING) {
+                // AI Care Report Button
                 TossButton(
-                    text = "간병 완료 및 에스크로 정산 승인",
-                    backgroundColor = TossGreen,
-                    onClick = onReleaseEscrow,
-                    testTag = "btn_release_escrow"
+                    text = "✨ AI Care Report & 가족 공유 🔗",
+                    backgroundColor = TossBlueDark,
+                    onClick = onViewReportClick,
+                    testTag = "btn_ai_care_report"
                 )
-            } else if (contract.escrowStatus == EscrowStatus.RELEASED) {
-                if (contract.isReviewed) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(TossBackground)
-                            .padding(14.dp)
-                    ) {
-                        Column {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(imageVector = Icons.Default.CheckCircle, contentDescription = null, tint = TossGreen, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("정산 및 후기 등록 완료 (★ ${contract.ratingGiven})", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
-                            }
-                            if (contract.reviewComment.isNotBlank()) {
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "\"${contract.reviewComment}\"",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = TossGray
-                                )
-                            }
-                        }
-                    }
-                } else {
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Actions based on escrow status
+                if (!contract.isReviewed) {
                     TossButton(
                         text = "케어메이트 안심 후기 작성하기",
                         backgroundColor = TossBlue,
                         onClick = onReviewClick,
                         testTag = "btn_write_review"
                     )
+                } else {
+                    TossButton(
+                        text = "🔄 초기 화면으로 돌아가기 (새 간병 공고 등록)",
+                        backgroundColor = TossGreen,
+                        onClick = onResetCycle,
+                        testTag = "btn_reset_cycle"
+                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ContractDetailRow(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = label, style = MaterialTheme.typography.bodySmall, color = TossGray)
+        Text(text = value, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, color = TossBlack)
     }
 }

@@ -18,6 +18,7 @@ import com.example.careplus.data.model.BidStatus;
 import com.example.careplus.data.model.CareType;
 import com.example.careplus.data.model.Consciousness;
 import com.example.careplus.data.model.EscrowStatus;
+import com.example.careplus.data.model.JourneyStep;
 import com.example.careplus.data.model.Mobility;
 import com.example.careplus.data.model.PatientGender;
 import com.example.careplus.data.model.RequestStatus;
@@ -61,7 +62,15 @@ public final class CareDao_Impl implements CareDao {
 
   private final SharedSQLiteStatement __preparedStmtOfUpdateEscrowStatus;
 
+  private final SharedSQLiteStatement __preparedStmtOfUpdateJourneyStep;
+
   private final SharedSQLiteStatement __preparedStmtOfSubmitReview;
+
+  private final SharedSQLiteStatement __preparedStmtOfDeleteAllContracts;
+
+  private final SharedSQLiteStatement __preparedStmtOfDeleteAllRequests;
+
+  private final SharedSQLiteStatement __preparedStmtOfDeleteAllBids;
 
   public CareDao_Impl(@NonNull final RoomDatabase __db) {
     this.__db = __db;
@@ -105,7 +114,7 @@ public final class CareDao_Impl implements CareDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT OR REPLACE INTO `caregivers` (`caregiverId`,`name`,`careerYears`,`rating`,`reviewCount`,`distanceKm`,`travelTimeMinutes`,`certList`,`insuranceYn`,`vaccineYn`,`gender`,`bio`,`phoneMasked`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        return "INSERT OR REPLACE INTO `caregivers` (`caregiverId`,`name`,`careerYears`,`rating`,`reviewCount`,`distanceKm`,`travelTimeMinutes`,`certList`,`insuranceYn`,`vaccineYn`,`gender`,`bio`,`brixScore`,`phoneMasked`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -127,14 +136,15 @@ public final class CareDao_Impl implements CareDao {
         final String _tmp_3 = __careConverters.fromPatientGender(entity.getGender());
         statement.bindString(11, _tmp_3);
         statement.bindString(12, entity.getBio());
-        statement.bindString(13, entity.getPhoneMasked());
+        statement.bindDouble(13, entity.getBrixScore());
+        statement.bindString(14, entity.getPhoneMasked());
       }
     };
     this.__insertionAdapterOfCareBidEntity = new EntityInsertionAdapter<CareBidEntity>(__db) {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT OR REPLACE INTO `care_bids` (`bidId`,`requestId`,`caregiverId`,`caregiverName`,`careerYears`,`rating`,`reviewCount`,`distanceKm`,`travelTimeMinutes`,`certList`,`insuranceYn`,`vaccineYn`,`gender`,`pitchMessage`,`dailyPrice`,`status`,`createdAt`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        return "INSERT OR REPLACE INTO `care_bids` (`bidId`,`requestId`,`caregiverId`,`caregiverName`,`careerYears`,`rating`,`reviewCount`,`distanceKm`,`travelTimeMinutes`,`certList`,`insuranceYn`,`vaccineYn`,`gender`,`pitchMessage`,`dailyPrice`,`brixScore`,`status`,`createdAt`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -159,9 +169,10 @@ public final class CareDao_Impl implements CareDao {
         statement.bindString(13, _tmp_3);
         statement.bindString(14, entity.getPitchMessage());
         statement.bindLong(15, entity.getDailyPrice());
+        statement.bindDouble(16, entity.getBrixScore());
         final String _tmp_4 = __careConverters.fromBidStatus(entity.getStatus());
-        statement.bindString(16, _tmp_4);
-        statement.bindLong(17, entity.getCreatedAt());
+        statement.bindString(17, _tmp_4);
+        statement.bindLong(18, entity.getCreatedAt());
       }
     };
     this.__insertionAdapterOfChatMessageEntity = new EntityInsertionAdapter<ChatMessageEntity>(__db) {
@@ -190,7 +201,7 @@ public final class CareDao_Impl implements CareDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT OR REPLACE INTO `contracts` (`contractId`,`requestId`,`bidId`,`caregiverId`,`caregiverName`,`guardianName`,`location`,`dates`,`dailyPrice`,`totalDays`,`supplyPrice`,`platformFee`,`totalPrice`,`escrowStatus`,`isReviewed`,`ratingGiven`,`reviewComment`,`createdAt`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        return "INSERT OR REPLACE INTO `contracts` (`contractId`,`requestId`,`bidId`,`caregiverId`,`caregiverName`,`guardianName`,`location`,`dates`,`dailyPrice`,`totalDays`,`supplyPrice`,`platformFee`,`totalPrice`,`escrowStatus`,`journeyStep`,`shareToken`,`isReviewed`,`ratingGiven`,`reviewComment`,`createdAt`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -211,11 +222,14 @@ public final class CareDao_Impl implements CareDao {
         statement.bindLong(13, entity.getTotalPrice());
         final String _tmp = __careConverters.fromEscrowStatus(entity.getEscrowStatus());
         statement.bindString(14, _tmp);
-        final int _tmp_1 = entity.isReviewed() ? 1 : 0;
-        statement.bindLong(15, _tmp_1);
-        statement.bindDouble(16, entity.getRatingGiven());
-        statement.bindString(17, entity.getReviewComment());
-        statement.bindLong(18, entity.getCreatedAt());
+        final String _tmp_1 = __careConverters.fromJourneyStep(entity.getJourneyStep());
+        statement.bindString(15, _tmp_1);
+        statement.bindString(16, entity.getShareToken());
+        final int _tmp_2 = entity.isReviewed() ? 1 : 0;
+        statement.bindLong(17, _tmp_2);
+        statement.bindDouble(18, entity.getRatingGiven());
+        statement.bindString(19, entity.getReviewComment());
+        statement.bindLong(20, entity.getCreatedAt());
       }
     };
     this.__updateAdapterOfCareRequestEntity = new EntityDeletionOrUpdateAdapter<CareRequestEntity>(__db) {
@@ -271,11 +285,43 @@ public final class CareDao_Impl implements CareDao {
         return _query;
       }
     };
+    this.__preparedStmtOfUpdateJourneyStep = new SharedSQLiteStatement(__db) {
+      @Override
+      @NonNull
+      public String createQuery() {
+        final String _query = "UPDATE contracts SET journeyStep = ? WHERE contractId = ?";
+        return _query;
+      }
+    };
     this.__preparedStmtOfSubmitReview = new SharedSQLiteStatement(__db) {
       @Override
       @NonNull
       public String createQuery() {
         final String _query = "UPDATE contracts SET isReviewed = 1, ratingGiven = ?, reviewComment = ? WHERE contractId = ?";
+        return _query;
+      }
+    };
+    this.__preparedStmtOfDeleteAllContracts = new SharedSQLiteStatement(__db) {
+      @Override
+      @NonNull
+      public String createQuery() {
+        final String _query = "DELETE FROM contracts";
+        return _query;
+      }
+    };
+    this.__preparedStmtOfDeleteAllRequests = new SharedSQLiteStatement(__db) {
+      @Override
+      @NonNull
+      public String createQuery() {
+        final String _query = "DELETE FROM care_requests";
+        return _query;
+      }
+    };
+    this.__preparedStmtOfDeleteAllBids = new SharedSQLiteStatement(__db) {
+      @Override
+      @NonNull
+      public String createQuery() {
+        final String _query = "DELETE FROM care_bids";
         return _query;
       }
     };
@@ -472,6 +518,35 @@ public final class CareDao_Impl implements CareDao {
   }
 
   @Override
+  public Object updateJourneyStep(final long contractId, final JourneyStep step,
+      final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        final SupportSQLiteStatement _stmt = __preparedStmtOfUpdateJourneyStep.acquire();
+        int _argIndex = 1;
+        final String _tmp = __careConverters.fromJourneyStep(step);
+        _stmt.bindString(_argIndex, _tmp);
+        _argIndex = 2;
+        _stmt.bindLong(_argIndex, contractId);
+        try {
+          __db.beginTransaction();
+          try {
+            _stmt.executeUpdateDelete();
+            __db.setTransactionSuccessful();
+            return Unit.INSTANCE;
+          } finally {
+            __db.endTransaction();
+          }
+        } finally {
+          __preparedStmtOfUpdateJourneyStep.release(_stmt);
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
   public Object submitReview(final long contractId, final float rating, final String comment,
       final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
@@ -496,6 +571,75 @@ public final class CareDao_Impl implements CareDao {
           }
         } finally {
           __preparedStmtOfSubmitReview.release(_stmt);
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object deleteAllContracts(final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        final SupportSQLiteStatement _stmt = __preparedStmtOfDeleteAllContracts.acquire();
+        try {
+          __db.beginTransaction();
+          try {
+            _stmt.executeUpdateDelete();
+            __db.setTransactionSuccessful();
+            return Unit.INSTANCE;
+          } finally {
+            __db.endTransaction();
+          }
+        } finally {
+          __preparedStmtOfDeleteAllContracts.release(_stmt);
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object deleteAllRequests(final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        final SupportSQLiteStatement _stmt = __preparedStmtOfDeleteAllRequests.acquire();
+        try {
+          __db.beginTransaction();
+          try {
+            _stmt.executeUpdateDelete();
+            __db.setTransactionSuccessful();
+            return Unit.INSTANCE;
+          } finally {
+            __db.endTransaction();
+          }
+        } finally {
+          __preparedStmtOfDeleteAllRequests.release(_stmt);
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object deleteAllBids(final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        final SupportSQLiteStatement _stmt = __preparedStmtOfDeleteAllBids.acquire();
+        try {
+          __db.beginTransaction();
+          try {
+            _stmt.executeUpdateDelete();
+            __db.setTransactionSuccessful();
+            return Unit.INSTANCE;
+          } finally {
+            __db.endTransaction();
+          }
+        } finally {
+          __preparedStmtOfDeleteAllBids.release(_stmt);
         }
       }
     }, $completion);
@@ -805,6 +949,7 @@ public final class CareDao_Impl implements CareDao {
           final int _cursorIndexOfVaccineYn = CursorUtil.getColumnIndexOrThrow(_cursor, "vaccineYn");
           final int _cursorIndexOfGender = CursorUtil.getColumnIndexOrThrow(_cursor, "gender");
           final int _cursorIndexOfBio = CursorUtil.getColumnIndexOrThrow(_cursor, "bio");
+          final int _cursorIndexOfBrixScore = CursorUtil.getColumnIndexOrThrow(_cursor, "brixScore");
           final int _cursorIndexOfPhoneMasked = CursorUtil.getColumnIndexOrThrow(_cursor, "phoneMasked");
           final List<CaregiverProfileEntity> _result = new ArrayList<CaregiverProfileEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
@@ -841,9 +986,11 @@ public final class CareDao_Impl implements CareDao {
             _tmpGender = __careConverters.toPatientGender(_tmp_3);
             final String _tmpBio;
             _tmpBio = _cursor.getString(_cursorIndexOfBio);
+            final float _tmpBrixScore;
+            _tmpBrixScore = _cursor.getFloat(_cursorIndexOfBrixScore);
             final String _tmpPhoneMasked;
             _tmpPhoneMasked = _cursor.getString(_cursorIndexOfPhoneMasked);
-            _item = new CaregiverProfileEntity(_tmpCaregiverId,_tmpName,_tmpCareerYears,_tmpRating,_tmpReviewCount,_tmpDistanceKm,_tmpTravelTimeMinutes,_tmpCertList,_tmpInsuranceYn,_tmpVaccineYn,_tmpGender,_tmpBio,_tmpPhoneMasked);
+            _item = new CaregiverProfileEntity(_tmpCaregiverId,_tmpName,_tmpCareerYears,_tmpRating,_tmpReviewCount,_tmpDistanceKm,_tmpTravelTimeMinutes,_tmpCertList,_tmpInsuranceYn,_tmpVaccineYn,_tmpGender,_tmpBio,_tmpBrixScore,_tmpPhoneMasked);
             _result.add(_item);
           }
           return _result;
@@ -886,6 +1033,7 @@ public final class CareDao_Impl implements CareDao {
           final int _cursorIndexOfGender = CursorUtil.getColumnIndexOrThrow(_cursor, "gender");
           final int _cursorIndexOfPitchMessage = CursorUtil.getColumnIndexOrThrow(_cursor, "pitchMessage");
           final int _cursorIndexOfDailyPrice = CursorUtil.getColumnIndexOrThrow(_cursor, "dailyPrice");
+          final int _cursorIndexOfBrixScore = CursorUtil.getColumnIndexOrThrow(_cursor, "brixScore");
           final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
           final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "createdAt");
           final List<CareBidEntity> _result = new ArrayList<CareBidEntity>(_cursor.getCount());
@@ -929,13 +1077,15 @@ public final class CareDao_Impl implements CareDao {
             _tmpPitchMessage = _cursor.getString(_cursorIndexOfPitchMessage);
             final int _tmpDailyPrice;
             _tmpDailyPrice = _cursor.getInt(_cursorIndexOfDailyPrice);
+            final float _tmpBrixScore;
+            _tmpBrixScore = _cursor.getFloat(_cursorIndexOfBrixScore);
             final BidStatus _tmpStatus;
             final String _tmp_4;
             _tmp_4 = _cursor.getString(_cursorIndexOfStatus);
             _tmpStatus = __careConverters.toBidStatus(_tmp_4);
             final long _tmpCreatedAt;
             _tmpCreatedAt = _cursor.getLong(_cursorIndexOfCreatedAt);
-            _item = new CareBidEntity(_tmpBidId,_tmpRequestId,_tmpCaregiverId,_tmpCaregiverName,_tmpCareerYears,_tmpRating,_tmpReviewCount,_tmpDistanceKm,_tmpTravelTimeMinutes,_tmpCertList,_tmpInsuranceYn,_tmpVaccineYn,_tmpGender,_tmpPitchMessage,_tmpDailyPrice,_tmpStatus,_tmpCreatedAt);
+            _item = new CareBidEntity(_tmpBidId,_tmpRequestId,_tmpCaregiverId,_tmpCaregiverName,_tmpCareerYears,_tmpRating,_tmpReviewCount,_tmpDistanceKm,_tmpTravelTimeMinutes,_tmpCertList,_tmpInsuranceYn,_tmpVaccineYn,_tmpGender,_tmpPitchMessage,_tmpDailyPrice,_tmpBrixScore,_tmpStatus,_tmpCreatedAt);
             _result.add(_item);
           }
           return _result;
@@ -980,6 +1130,7 @@ public final class CareDao_Impl implements CareDao {
           final int _cursorIndexOfGender = CursorUtil.getColumnIndexOrThrow(_cursor, "gender");
           final int _cursorIndexOfPitchMessage = CursorUtil.getColumnIndexOrThrow(_cursor, "pitchMessage");
           final int _cursorIndexOfDailyPrice = CursorUtil.getColumnIndexOrThrow(_cursor, "dailyPrice");
+          final int _cursorIndexOfBrixScore = CursorUtil.getColumnIndexOrThrow(_cursor, "brixScore");
           final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
           final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "createdAt");
           final CareBidEntity _result;
@@ -1022,13 +1173,15 @@ public final class CareDao_Impl implements CareDao {
             _tmpPitchMessage = _cursor.getString(_cursorIndexOfPitchMessage);
             final int _tmpDailyPrice;
             _tmpDailyPrice = _cursor.getInt(_cursorIndexOfDailyPrice);
+            final float _tmpBrixScore;
+            _tmpBrixScore = _cursor.getFloat(_cursorIndexOfBrixScore);
             final BidStatus _tmpStatus;
             final String _tmp_4;
             _tmp_4 = _cursor.getString(_cursorIndexOfStatus);
             _tmpStatus = __careConverters.toBidStatus(_tmp_4);
             final long _tmpCreatedAt;
             _tmpCreatedAt = _cursor.getLong(_cursorIndexOfCreatedAt);
-            _result = new CareBidEntity(_tmpBidId,_tmpRequestId,_tmpCaregiverId,_tmpCaregiverName,_tmpCareerYears,_tmpRating,_tmpReviewCount,_tmpDistanceKm,_tmpTravelTimeMinutes,_tmpCertList,_tmpInsuranceYn,_tmpVaccineYn,_tmpGender,_tmpPitchMessage,_tmpDailyPrice,_tmpStatus,_tmpCreatedAt);
+            _result = new CareBidEntity(_tmpBidId,_tmpRequestId,_tmpCaregiverId,_tmpCaregiverName,_tmpCareerYears,_tmpRating,_tmpReviewCount,_tmpDistanceKm,_tmpTravelTimeMinutes,_tmpCertList,_tmpInsuranceYn,_tmpVaccineYn,_tmpGender,_tmpPitchMessage,_tmpDailyPrice,_tmpBrixScore,_tmpStatus,_tmpCreatedAt);
           } else {
             _result = null;
           }
@@ -1125,6 +1278,8 @@ public final class CareDao_Impl implements CareDao {
           final int _cursorIndexOfPlatformFee = CursorUtil.getColumnIndexOrThrow(_cursor, "platformFee");
           final int _cursorIndexOfTotalPrice = CursorUtil.getColumnIndexOrThrow(_cursor, "totalPrice");
           final int _cursorIndexOfEscrowStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "escrowStatus");
+          final int _cursorIndexOfJourneyStep = CursorUtil.getColumnIndexOrThrow(_cursor, "journeyStep");
+          final int _cursorIndexOfShareToken = CursorUtil.getColumnIndexOrThrow(_cursor, "shareToken");
           final int _cursorIndexOfIsReviewed = CursorUtil.getColumnIndexOrThrow(_cursor, "isReviewed");
           final int _cursorIndexOfRatingGiven = CursorUtil.getColumnIndexOrThrow(_cursor, "ratingGiven");
           final int _cursorIndexOfReviewComment = CursorUtil.getColumnIndexOrThrow(_cursor, "reviewComment");
@@ -1162,17 +1317,23 @@ public final class CareDao_Impl implements CareDao {
             final String _tmp;
             _tmp = _cursor.getString(_cursorIndexOfEscrowStatus);
             _tmpEscrowStatus = __careConverters.toEscrowStatus(_tmp);
+            final JourneyStep _tmpJourneyStep;
+            final String _tmp_1;
+            _tmp_1 = _cursor.getString(_cursorIndexOfJourneyStep);
+            _tmpJourneyStep = __careConverters.toJourneyStep(_tmp_1);
+            final String _tmpShareToken;
+            _tmpShareToken = _cursor.getString(_cursorIndexOfShareToken);
             final boolean _tmpIsReviewed;
-            final int _tmp_1;
-            _tmp_1 = _cursor.getInt(_cursorIndexOfIsReviewed);
-            _tmpIsReviewed = _tmp_1 != 0;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfIsReviewed);
+            _tmpIsReviewed = _tmp_2 != 0;
             final float _tmpRatingGiven;
             _tmpRatingGiven = _cursor.getFloat(_cursorIndexOfRatingGiven);
             final String _tmpReviewComment;
             _tmpReviewComment = _cursor.getString(_cursorIndexOfReviewComment);
             final long _tmpCreatedAt;
             _tmpCreatedAt = _cursor.getLong(_cursorIndexOfCreatedAt);
-            _item = new ContractEntity(_tmpContractId,_tmpRequestId,_tmpBidId,_tmpCaregiverId,_tmpCaregiverName,_tmpGuardianName,_tmpLocation,_tmpDates,_tmpDailyPrice,_tmpTotalDays,_tmpSupplyPrice,_tmpPlatformFee,_tmpTotalPrice,_tmpEscrowStatus,_tmpIsReviewed,_tmpRatingGiven,_tmpReviewComment,_tmpCreatedAt);
+            _item = new ContractEntity(_tmpContractId,_tmpRequestId,_tmpBidId,_tmpCaregiverId,_tmpCaregiverName,_tmpGuardianName,_tmpLocation,_tmpDates,_tmpDailyPrice,_tmpTotalDays,_tmpSupplyPrice,_tmpPlatformFee,_tmpTotalPrice,_tmpEscrowStatus,_tmpJourneyStep,_tmpShareToken,_tmpIsReviewed,_tmpRatingGiven,_tmpReviewComment,_tmpCreatedAt);
             _result.add(_item);
           }
           return _result;
@@ -1216,6 +1377,8 @@ public final class CareDao_Impl implements CareDao {
           final int _cursorIndexOfPlatformFee = CursorUtil.getColumnIndexOrThrow(_cursor, "platformFee");
           final int _cursorIndexOfTotalPrice = CursorUtil.getColumnIndexOrThrow(_cursor, "totalPrice");
           final int _cursorIndexOfEscrowStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "escrowStatus");
+          final int _cursorIndexOfJourneyStep = CursorUtil.getColumnIndexOrThrow(_cursor, "journeyStep");
+          final int _cursorIndexOfShareToken = CursorUtil.getColumnIndexOrThrow(_cursor, "shareToken");
           final int _cursorIndexOfIsReviewed = CursorUtil.getColumnIndexOrThrow(_cursor, "isReviewed");
           final int _cursorIndexOfRatingGiven = CursorUtil.getColumnIndexOrThrow(_cursor, "ratingGiven");
           final int _cursorIndexOfReviewComment = CursorUtil.getColumnIndexOrThrow(_cursor, "reviewComment");
@@ -1252,17 +1415,23 @@ public final class CareDao_Impl implements CareDao {
             final String _tmp;
             _tmp = _cursor.getString(_cursorIndexOfEscrowStatus);
             _tmpEscrowStatus = __careConverters.toEscrowStatus(_tmp);
+            final JourneyStep _tmpJourneyStep;
+            final String _tmp_1;
+            _tmp_1 = _cursor.getString(_cursorIndexOfJourneyStep);
+            _tmpJourneyStep = __careConverters.toJourneyStep(_tmp_1);
+            final String _tmpShareToken;
+            _tmpShareToken = _cursor.getString(_cursorIndexOfShareToken);
             final boolean _tmpIsReviewed;
-            final int _tmp_1;
-            _tmp_1 = _cursor.getInt(_cursorIndexOfIsReviewed);
-            _tmpIsReviewed = _tmp_1 != 0;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfIsReviewed);
+            _tmpIsReviewed = _tmp_2 != 0;
             final float _tmpRatingGiven;
             _tmpRatingGiven = _cursor.getFloat(_cursorIndexOfRatingGiven);
             final String _tmpReviewComment;
             _tmpReviewComment = _cursor.getString(_cursorIndexOfReviewComment);
             final long _tmpCreatedAt;
             _tmpCreatedAt = _cursor.getLong(_cursorIndexOfCreatedAt);
-            _result = new ContractEntity(_tmpContractId,_tmpRequestId,_tmpBidId,_tmpCaregiverId,_tmpCaregiverName,_tmpGuardianName,_tmpLocation,_tmpDates,_tmpDailyPrice,_tmpTotalDays,_tmpSupplyPrice,_tmpPlatformFee,_tmpTotalPrice,_tmpEscrowStatus,_tmpIsReviewed,_tmpRatingGiven,_tmpReviewComment,_tmpCreatedAt);
+            _result = new ContractEntity(_tmpContractId,_tmpRequestId,_tmpBidId,_tmpCaregiverId,_tmpCaregiverName,_tmpGuardianName,_tmpLocation,_tmpDates,_tmpDailyPrice,_tmpTotalDays,_tmpSupplyPrice,_tmpPlatformFee,_tmpTotalPrice,_tmpEscrowStatus,_tmpJourneyStep,_tmpShareToken,_tmpIsReviewed,_tmpRatingGiven,_tmpReviewComment,_tmpCreatedAt);
           } else {
             _result = null;
           }
@@ -1303,6 +1472,8 @@ public final class CareDao_Impl implements CareDao {
           final int _cursorIndexOfPlatformFee = CursorUtil.getColumnIndexOrThrow(_cursor, "platformFee");
           final int _cursorIndexOfTotalPrice = CursorUtil.getColumnIndexOrThrow(_cursor, "totalPrice");
           final int _cursorIndexOfEscrowStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "escrowStatus");
+          final int _cursorIndexOfJourneyStep = CursorUtil.getColumnIndexOrThrow(_cursor, "journeyStep");
+          final int _cursorIndexOfShareToken = CursorUtil.getColumnIndexOrThrow(_cursor, "shareToken");
           final int _cursorIndexOfIsReviewed = CursorUtil.getColumnIndexOrThrow(_cursor, "isReviewed");
           final int _cursorIndexOfRatingGiven = CursorUtil.getColumnIndexOrThrow(_cursor, "ratingGiven");
           final int _cursorIndexOfReviewComment = CursorUtil.getColumnIndexOrThrow(_cursor, "reviewComment");
@@ -1339,17 +1510,23 @@ public final class CareDao_Impl implements CareDao {
             final String _tmp;
             _tmp = _cursor.getString(_cursorIndexOfEscrowStatus);
             _tmpEscrowStatus = __careConverters.toEscrowStatus(_tmp);
+            final JourneyStep _tmpJourneyStep;
+            final String _tmp_1;
+            _tmp_1 = _cursor.getString(_cursorIndexOfJourneyStep);
+            _tmpJourneyStep = __careConverters.toJourneyStep(_tmp_1);
+            final String _tmpShareToken;
+            _tmpShareToken = _cursor.getString(_cursorIndexOfShareToken);
             final boolean _tmpIsReviewed;
-            final int _tmp_1;
-            _tmp_1 = _cursor.getInt(_cursorIndexOfIsReviewed);
-            _tmpIsReviewed = _tmp_1 != 0;
+            final int _tmp_2;
+            _tmp_2 = _cursor.getInt(_cursorIndexOfIsReviewed);
+            _tmpIsReviewed = _tmp_2 != 0;
             final float _tmpRatingGiven;
             _tmpRatingGiven = _cursor.getFloat(_cursorIndexOfRatingGiven);
             final String _tmpReviewComment;
             _tmpReviewComment = _cursor.getString(_cursorIndexOfReviewComment);
             final long _tmpCreatedAt;
             _tmpCreatedAt = _cursor.getLong(_cursorIndexOfCreatedAt);
-            _result = new ContractEntity(_tmpContractId,_tmpRequestId,_tmpBidId,_tmpCaregiverId,_tmpCaregiverName,_tmpGuardianName,_tmpLocation,_tmpDates,_tmpDailyPrice,_tmpTotalDays,_tmpSupplyPrice,_tmpPlatformFee,_tmpTotalPrice,_tmpEscrowStatus,_tmpIsReviewed,_tmpRatingGiven,_tmpReviewComment,_tmpCreatedAt);
+            _result = new ContractEntity(_tmpContractId,_tmpRequestId,_tmpBidId,_tmpCaregiverId,_tmpCaregiverName,_tmpGuardianName,_tmpLocation,_tmpDates,_tmpDailyPrice,_tmpTotalDays,_tmpSupplyPrice,_tmpPlatformFee,_tmpTotalPrice,_tmpEscrowStatus,_tmpJourneyStep,_tmpShareToken,_tmpIsReviewed,_tmpRatingGiven,_tmpReviewComment,_tmpCreatedAt);
           } else {
             _result = null;
           }

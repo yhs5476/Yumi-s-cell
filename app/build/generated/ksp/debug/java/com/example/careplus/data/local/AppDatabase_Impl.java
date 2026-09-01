@@ -31,16 +31,16 @@ public final class AppDatabase_Impl extends AppDatabase {
   @Override
   @NonNull
   protected SupportSQLiteOpenHelper createOpenHelper(@NonNull final DatabaseConfiguration config) {
-    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(1) {
+    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(3) {
       @Override
       public void createAllTables(@NonNull final SupportSQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS `care_requests` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `guardianName` TEXT NOT NULL, `location` TEXT NOT NULL, `hospitalName` TEXT NOT NULL, `careType` TEXT NOT NULL, `mobility` TEXT NOT NULL, `consciousness` TEXT NOT NULL, `weightRange` TEXT NOT NULL, `gender` TEXT NOT NULL, `ageRange` TEXT NOT NULL, `specialNeeds` TEXT NOT NULL, `startDate` TEXT NOT NULL, `endDate` TEXT NOT NULL, `totalDays` INTEGER NOT NULL, `status` TEXT NOT NULL, `createdAt` INTEGER NOT NULL)");
-        db.execSQL("CREATE TABLE IF NOT EXISTS `caregivers` (`caregiverId` TEXT NOT NULL, `name` TEXT NOT NULL, `careerYears` INTEGER NOT NULL, `rating` REAL NOT NULL, `reviewCount` INTEGER NOT NULL, `distanceKm` REAL NOT NULL, `travelTimeMinutes` INTEGER NOT NULL, `certList` TEXT NOT NULL, `insuranceYn` INTEGER NOT NULL, `vaccineYn` INTEGER NOT NULL, `gender` TEXT NOT NULL, `bio` TEXT NOT NULL, `phoneMasked` TEXT NOT NULL, PRIMARY KEY(`caregiverId`))");
-        db.execSQL("CREATE TABLE IF NOT EXISTS `care_bids` (`bidId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `requestId` INTEGER NOT NULL, `caregiverId` TEXT NOT NULL, `caregiverName` TEXT NOT NULL, `careerYears` INTEGER NOT NULL, `rating` REAL NOT NULL, `reviewCount` INTEGER NOT NULL, `distanceKm` REAL NOT NULL, `travelTimeMinutes` INTEGER NOT NULL, `certList` TEXT NOT NULL, `insuranceYn` INTEGER NOT NULL, `vaccineYn` INTEGER NOT NULL, `gender` TEXT NOT NULL, `pitchMessage` TEXT NOT NULL, `dailyPrice` INTEGER NOT NULL, `status` TEXT NOT NULL, `createdAt` INTEGER NOT NULL)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `caregivers` (`caregiverId` TEXT NOT NULL, `name` TEXT NOT NULL, `careerYears` INTEGER NOT NULL, `rating` REAL NOT NULL, `reviewCount` INTEGER NOT NULL, `distanceKm` REAL NOT NULL, `travelTimeMinutes` INTEGER NOT NULL, `certList` TEXT NOT NULL, `insuranceYn` INTEGER NOT NULL, `vaccineYn` INTEGER NOT NULL, `gender` TEXT NOT NULL, `bio` TEXT NOT NULL, `brixScore` REAL NOT NULL, `phoneMasked` TEXT NOT NULL, PRIMARY KEY(`caregiverId`))");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `care_bids` (`bidId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `requestId` INTEGER NOT NULL, `caregiverId` TEXT NOT NULL, `caregiverName` TEXT NOT NULL, `careerYears` INTEGER NOT NULL, `rating` REAL NOT NULL, `reviewCount` INTEGER NOT NULL, `distanceKm` REAL NOT NULL, `travelTimeMinutes` INTEGER NOT NULL, `certList` TEXT NOT NULL, `insuranceYn` INTEGER NOT NULL, `vaccineYn` INTEGER NOT NULL, `gender` TEXT NOT NULL, `pitchMessage` TEXT NOT NULL, `dailyPrice` INTEGER NOT NULL, `brixScore` REAL NOT NULL, `status` TEXT NOT NULL, `createdAt` INTEGER NOT NULL)");
         db.execSQL("CREATE TABLE IF NOT EXISTS `chat_messages` (`messageId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bidId` INTEGER NOT NULL, `senderRole` TEXT NOT NULL, `senderName` TEXT NOT NULL, `content` TEXT NOT NULL, `isInvoice` INTEGER NOT NULL, `invoiceTotalPrice` INTEGER NOT NULL, `invoiceDays` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL)");
-        db.execSQL("CREATE TABLE IF NOT EXISTS `contracts` (`contractId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `requestId` INTEGER NOT NULL, `bidId` INTEGER NOT NULL, `caregiverId` TEXT NOT NULL, `caregiverName` TEXT NOT NULL, `guardianName` TEXT NOT NULL, `location` TEXT NOT NULL, `dates` TEXT NOT NULL, `dailyPrice` INTEGER NOT NULL, `totalDays` INTEGER NOT NULL, `supplyPrice` INTEGER NOT NULL, `platformFee` INTEGER NOT NULL, `totalPrice` INTEGER NOT NULL, `escrowStatus` TEXT NOT NULL, `isReviewed` INTEGER NOT NULL, `ratingGiven` REAL NOT NULL, `reviewComment` TEXT NOT NULL, `createdAt` INTEGER NOT NULL)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `contracts` (`contractId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `requestId` INTEGER NOT NULL, `bidId` INTEGER NOT NULL, `caregiverId` TEXT NOT NULL, `caregiverName` TEXT NOT NULL, `guardianName` TEXT NOT NULL, `location` TEXT NOT NULL, `dates` TEXT NOT NULL, `dailyPrice` INTEGER NOT NULL, `totalDays` INTEGER NOT NULL, `supplyPrice` INTEGER NOT NULL, `platformFee` INTEGER NOT NULL, `totalPrice` INTEGER NOT NULL, `escrowStatus` TEXT NOT NULL, `journeyStep` TEXT NOT NULL, `shareToken` TEXT NOT NULL, `isReviewed` INTEGER NOT NULL, `ratingGiven` REAL NOT NULL, `reviewComment` TEXT NOT NULL, `createdAt` INTEGER NOT NULL)");
         db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '88361f90fecb5c188ebb377e0164c6db')");
+        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '553c5f207dcc2aee3d2b3896f3c6fd03')");
       }
 
       @Override
@@ -119,7 +119,7 @@ public final class AppDatabase_Impl extends AppDatabase {
                   + " Expected:\n" + _infoCareRequests + "\n"
                   + " Found:\n" + _existingCareRequests);
         }
-        final HashMap<String, TableInfo.Column> _columnsCaregivers = new HashMap<String, TableInfo.Column>(13);
+        final HashMap<String, TableInfo.Column> _columnsCaregivers = new HashMap<String, TableInfo.Column>(14);
         _columnsCaregivers.put("caregiverId", new TableInfo.Column("caregiverId", "TEXT", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsCaregivers.put("name", new TableInfo.Column("name", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsCaregivers.put("careerYears", new TableInfo.Column("careerYears", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -132,6 +132,7 @@ public final class AppDatabase_Impl extends AppDatabase {
         _columnsCaregivers.put("vaccineYn", new TableInfo.Column("vaccineYn", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsCaregivers.put("gender", new TableInfo.Column("gender", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsCaregivers.put("bio", new TableInfo.Column("bio", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsCaregivers.put("brixScore", new TableInfo.Column("brixScore", "REAL", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsCaregivers.put("phoneMasked", new TableInfo.Column("phoneMasked", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysCaregivers = new HashSet<TableInfo.ForeignKey>(0);
         final HashSet<TableInfo.Index> _indicesCaregivers = new HashSet<TableInfo.Index>(0);
@@ -142,7 +143,7 @@ public final class AppDatabase_Impl extends AppDatabase {
                   + " Expected:\n" + _infoCaregivers + "\n"
                   + " Found:\n" + _existingCaregivers);
         }
-        final HashMap<String, TableInfo.Column> _columnsCareBids = new HashMap<String, TableInfo.Column>(17);
+        final HashMap<String, TableInfo.Column> _columnsCareBids = new HashMap<String, TableInfo.Column>(18);
         _columnsCareBids.put("bidId", new TableInfo.Column("bidId", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsCareBids.put("requestId", new TableInfo.Column("requestId", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsCareBids.put("caregiverId", new TableInfo.Column("caregiverId", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -158,6 +159,7 @@ public final class AppDatabase_Impl extends AppDatabase {
         _columnsCareBids.put("gender", new TableInfo.Column("gender", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsCareBids.put("pitchMessage", new TableInfo.Column("pitchMessage", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsCareBids.put("dailyPrice", new TableInfo.Column("dailyPrice", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsCareBids.put("brixScore", new TableInfo.Column("brixScore", "REAL", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsCareBids.put("status", new TableInfo.Column("status", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsCareBids.put("createdAt", new TableInfo.Column("createdAt", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysCareBids = new HashSet<TableInfo.ForeignKey>(0);
@@ -188,7 +190,7 @@ public final class AppDatabase_Impl extends AppDatabase {
                   + " Expected:\n" + _infoChatMessages + "\n"
                   + " Found:\n" + _existingChatMessages);
         }
-        final HashMap<String, TableInfo.Column> _columnsContracts = new HashMap<String, TableInfo.Column>(18);
+        final HashMap<String, TableInfo.Column> _columnsContracts = new HashMap<String, TableInfo.Column>(20);
         _columnsContracts.put("contractId", new TableInfo.Column("contractId", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsContracts.put("requestId", new TableInfo.Column("requestId", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsContracts.put("bidId", new TableInfo.Column("bidId", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -203,6 +205,8 @@ public final class AppDatabase_Impl extends AppDatabase {
         _columnsContracts.put("platformFee", new TableInfo.Column("platformFee", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsContracts.put("totalPrice", new TableInfo.Column("totalPrice", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsContracts.put("escrowStatus", new TableInfo.Column("escrowStatus", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsContracts.put("journeyStep", new TableInfo.Column("journeyStep", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsContracts.put("shareToken", new TableInfo.Column("shareToken", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsContracts.put("isReviewed", new TableInfo.Column("isReviewed", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsContracts.put("ratingGiven", new TableInfo.Column("ratingGiven", "REAL", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsContracts.put("reviewComment", new TableInfo.Column("reviewComment", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -218,7 +222,7 @@ public final class AppDatabase_Impl extends AppDatabase {
         }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "88361f90fecb5c188ebb377e0164c6db", "146004cb09c7f1e76e1f1ddb4bf9fe39");
+    }, "553c5f207dcc2aee3d2b3896f3c6fd03", "36fb06080c6da302c3e48ab18cb49d99");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(config.context).name(config.name).callback(_openCallback).build();
     final SupportSQLiteOpenHelper _helper = config.sqliteOpenHelperFactory.create(_sqliteConfig);
     return _helper;

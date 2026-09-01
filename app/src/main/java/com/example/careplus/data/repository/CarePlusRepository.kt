@@ -111,8 +111,29 @@ class CarePlusRepository(private val careDao: CareDao) {
         careDao.updateEscrowStatus(contractId, EscrowStatus.RELEASED)
     }
 
+    suspend fun updateJourneyStep(contractId: Long, nextStep: com.example.careplus.data.model.JourneyStep) {
+        careDao.updateJourneyStep(contractId, nextStep)
+    }
+
+    fun getCareReport(contract: ContractEntity): com.example.careplus.data.model.CareReportData {
+        return com.example.careplus.data.model.CareReportData(
+            summary = "오늘 외래 진료 및 검사가 안전하게 완료되었습니다. 어르신 컨디션 양호하시며 처방약 수령 후 귀가 완료되었습니다.",
+            treatmentNotes = "서울아산병원 내과 외래 진료 완료. 혈액 검사 및 X-ray 경과 양호. 식사 보조 및 이동 시 부축 지원 완료.",
+            nextAppointment = "2026년 9월 18일 (금) 오전 10:00 (신관 3층 내과)",
+            medicationInfo = "아침/저녁 식후 30분 복용 (유제품과 동시 복용 금지)",
+            guardianAlerts = "당일 수분 섭취 1.5L 권장, 야간 미열 발생 시 비상약 복용 필요",
+            shareToken = contract.shareToken
+        )
+    }
+
     suspend fun submitReview(contractId: Long, rating: Float, comment: String) {
         careDao.submitReview(contractId, rating, comment)
+    }
+
+    suspend fun completeAndResetCycle() {
+        careDao.deleteAllContracts()
+        careDao.deleteAllRequests()
+        careDao.deleteAllBids()
     }
 
     private suspend fun spawnSurroundingBids(requestId: Long, req: CareRequestEntity) {
@@ -176,7 +197,8 @@ class CarePlusRepository(private val careDao: CareDao) {
                 insuranceYn = true,
                 vaccineYn = true,
                 gender = PatientGender.FEMALE,
-                bio = "아산병원 중환자실 및 석션 케어 경험 풍부합니다. 따뜻하고 세심하게 케어합니다."
+                bio = "아산병원 중환자실 및 석션 케어 경험 풍부합니다. 따뜻하고 세심하게 케어합니다.",
+                brixScore = 18.8f
             ),
             CaregiverProfileEntity(
                 caregiverId = "cg_02",
@@ -190,7 +212,8 @@ class CarePlusRepository(private val careDao: CareDao) {
                 insuranceYn = true,
                 vaccineYn = true,
                 gender = PatientGender.FEMALE,
-                bio = "재활 운동 및 휠체어 이승 보조 전문입니다. 병원 시스템에 밝습니다."
+                bio = "재활 운동 및 휠체어 이승 보조 전문입니다. 병원 시스템에 밝습니다.",
+                brixScore = 19.2f
             ),
             CaregiverProfileEntity(
                 caregiverId = "cg_03",
@@ -204,7 +227,8 @@ class CarePlusRepository(private val careDao: CareDao) {
                 insuranceYn = true,
                 vaccineYn = true,
                 gender = PatientGender.MALE,
-                bio = "체격 있으신 어르신 체위 변경 및 와상 간병에 특화되어 있습니다."
+                bio = "체격 있으신 어르신 체위 변경 및 와상 간병에 특화되어 있습니다.",
+                brixScore = 16.5f
             ),
             CaregiverProfileEntity(
                 caregiverId = "cg_04",
@@ -218,7 +242,8 @@ class CarePlusRepository(private val careDao: CareDao) {
                 insuranceYn = true,
                 vaccineYn = true,
                 gender = PatientGender.FEMALE,
-                bio = "위관영양(콧줄) 및 도뇨관 소변줄 청결 케어 전문입니다."
+                bio = "위관영양(콧줄) 및 도뇨관 소변줄 청결 케어 전문입니다.",
+                brixScore = 14.2f
             )
         )
         careDao.insertCaregivers(sampleCaregivers)
@@ -260,6 +285,7 @@ class CarePlusRepository(private val careDao: CareDao) {
                 gender = PatientGender.FEMALE,
                 pitchMessage = "아산병원 중환자실 및 석션 케어 경험 풍부합니다. 정성껏 돌보겠습니다.",
                 dailyPrice = 140000,
+                brixScore = 18.8f,
                 status = BidStatus.PENDING,
                 createdAt = System.currentTimeMillis() - 1000 * 60 * 18
             ),
@@ -279,6 +305,7 @@ class CarePlusRepository(private val careDao: CareDao) {
                 gender = PatientGender.FEMALE,
                 pitchMessage = "부축 및 침상 운동 케어 능숙하며 식사 보조와 기저귀 케어 깔끔하게 진행합니다.",
                 dailyPrice = 135000,
+                brixScore = 19.2f,
                 status = BidStatus.PENDING,
                 createdAt = System.currentTimeMillis() - 1000 * 60 * 12
             ),
@@ -298,6 +325,7 @@ class CarePlusRepository(private val careDao: CareDao) {
                 gender = PatientGender.MALE,
                 pitchMessage = "체위 변경과 야간 응급 대처 확실히 해드립니다. 3일 연속 밀착 케어 가능합니다.",
                 dailyPrice = 150000,
+                brixScore = 16.5f,
                 status = BidStatus.PENDING,
                 createdAt = System.currentTimeMillis() - 1000 * 60 * 5
             )
@@ -332,5 +360,25 @@ class CarePlusRepository(private val careDao: CareDao) {
             )
         )
         initialMessages.forEach { careDao.insertMessage(it) }
+
+        // Seed sample active contract for immediate Door-to-Door Journey testing
+        val defaultContract = ContractEntity(
+            contractId = 1,
+            requestId = 1,
+            bidId = 1,
+            caregiverId = "cg_01",
+            caregiverName = "김*순 케어메이트",
+            guardianName = "김민준 보호자",
+            location = "서울아산병원 신관 7층",
+            dates = "2026.09.01 ~ 2026.09.04",
+            dailyPrice = 140000,
+            totalDays = 3,
+            supplyPrice = 420000,
+            platformFee = 21000,
+            totalPrice = 441000,
+            escrowStatus = EscrowStatus.HOLDING,
+            journeyStep = com.example.careplus.data.model.JourneyStep.TREATMENT_IN_PROGRESS
+        )
+        careDao.insertContract(defaultContract)
     }
 }

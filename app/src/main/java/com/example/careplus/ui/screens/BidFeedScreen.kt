@@ -31,6 +31,8 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -480,6 +482,9 @@ fun BidFeedCard(
                     }
                 }
 
+                Spacer(modifier = Modifier.height(12.dp))
+                com.example.careplus.ui.components.BrixGaugeBadge(brixScore = bid.brixScore)
+
                 Spacer(modifier = Modifier.height(14.dp))
 
                 // Pitch message quote box
@@ -522,13 +527,34 @@ fun BidFeedCard(
                         )
                     }
 
-                    TossButton(
-                        text = "채팅으로 상담하기",
-                        leadingIcon = Icons.AutoMirrored.Filled.Chat,
+                    Button(
                         onClick = onChatClick,
-                        modifier = Modifier.width(160.dp),
-                        testTag = "chat_bid_${bid.bidId}"
-                    )
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = TossBlue),
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp),
+                        modifier = Modifier
+                            .height(44.dp)
+                            .testTag("chat_bid_${bid.bidId}")
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Chat,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = TossSurface
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "1:1 채팅 상담",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = TossSurface,
+                                fontSize = 13.sp,
+                                maxLines = 1,
+                                softWrap = false
+                            )
+                        }
+                    }
                 }
             }
         }

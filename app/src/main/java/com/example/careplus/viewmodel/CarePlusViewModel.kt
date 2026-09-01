@@ -254,6 +254,24 @@ class CarePlusViewModel(private val repository: CarePlusRepository) : ViewModel(
         }
     }
 
+    fun completeAndResetCycle(onResetComplete: () -> Unit = {}) {
+        viewModelScope.launch {
+            repository.completeAndResetCycle()
+            _formState.value = FunnelFormState()
+            onResetComplete()
+        }
+    }
+
+    fun updateJourneyStep(contractId: Long, nextStep: com.example.careplus.data.model.JourneyStep) {
+        viewModelScope.launch {
+            repository.updateJourneyStep(contractId, nextStep)
+        }
+    }
+
+    fun getCareReport(contract: ContractEntity): com.example.careplus.data.model.CareReportData {
+        return repository.getCareReport(contract)
+    }
+
     fun submitCaregiverBid(
         requestId: Long,
         caregiverName: String,
