@@ -171,11 +171,11 @@ fun MyPageScreen(
                                 modifier = Modifier
                                     .size(56.dp)
                                     .clip(CircleShape)
-                                    .background(if (role == UserRole.GUARDIAN) TossBlueLight else Color(0xFFE6F9F1)),
+                                    .background(TossBlueLight),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = if (role == UserRole.GUARDIAN) "👤" else "👩‍⚕️",
+                                    text = "👤",
                                     fontSize = 28.sp
                                 )
                             }
@@ -183,16 +183,16 @@ fun MyPageScreen(
                             Column(modifier = Modifier.weight(1f)) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
-                                        text = if (role == UserRole.GUARDIAN) "김민준 보호자님" else "김*순 케어메이트님",
+                                        text = "김민준 보호자님",
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
                                         color = TossBlack
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     TossBadge(
-                                        text = if (role == UserRole.GUARDIAN) "보호자 계정" else "인증 메이트",
-                                        isGreen = (role == UserRole.CAREGIVER),
-                                        isHighlighted = (role == UserRole.GUARDIAN)
+                                        text = "안심 보호자",
+                                        isGreen = false,
+                                        isHighlighted = true
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(4.dp))
@@ -208,34 +208,26 @@ fun MyPageScreen(
                         HorizontalDivider(color = TossBorder)
                         Spacer(modifier = Modifier.height(14.dp))
 
-                        // Role Switcher Button
+                        // Guardian Quick Status Info
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(TossBackground)
-                                .clickable { viewModel.toggleRole() }
                                 .padding(horizontal = 14.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.SwapHoriz,
-                                    contentDescription = null,
-                                    tint = TossBlue,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "현재 모드: ${if (role == UserRole.GUARDIAN) "보호자 모드" else "간병인 모드"}",
+                                    text = "🛡️ 안심 돌봄 관리자",
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold,
                                     color = TossBlack
                                 )
                             }
                             Text(
-                                text = "모드 전환하기 ➔",
+                                text = "가족 2명 연동 중 ➔",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = TossBlue

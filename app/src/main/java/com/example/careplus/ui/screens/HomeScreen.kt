@@ -108,12 +108,8 @@ fun HomeScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    if (role == UserRole.GUARDIAN) {
-                        viewModel.updateForm { it.copy(careType = CareType.HOSPITAL) }
-                        onNavigateToRequestForm(CareType.HOSPITAL)
-                    } else {
-                        onNavigateToRadar()
-                    }
+                    viewModel.updateForm { it.copy(careType = CareType.HOSPITAL) }
+                    onNavigateToRequestForm(CareType.HOSPITAL)
                 },
                 containerColor = TossBlue,
                 contentColor = TossSurface,
@@ -125,12 +121,12 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = if (role == UserRole.GUARDIAN) Icons.Default.Add else Icons.Default.LocationOn,
+                        imageVector = Icons.Default.Add,
                         contentDescription = null
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = if (role == UserRole.GUARDIAN) "간병 공고 등록" else "실시간 공고 탐색",
+                        text = "간병 공고 등록",
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp
                     )
@@ -144,7 +140,7 @@ fun HomeScreen(
                 .padding(innerPadding),
             contentPadding = PaddingValues(bottom = 96.dp)
         ) {
-            // Header: Location & Role Switcher
+            // Header: Location & Profile
             item {
                 Row(
                     modifier = Modifier
@@ -193,32 +189,8 @@ fun HomeScreen(
                     }
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        // Role Switch Button
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(if (role == UserRole.GUARDIAN) TossBlueLight else TossGreenLight)
-                                .clickable { viewModel.toggleRole() }
-                                .padding(horizontal = 10.dp, vertical = 6.dp)
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.SwapHoriz,
-                                    contentDescription = "역할 전환",
-                                    tint = if (role == UserRole.GUARDIAN) TossBlue else TossGreen,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = if (role == UserRole.GUARDIAN) "보호자" else "간병인",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (role == UserRole.GUARDIAN) TossBlue else TossGreen
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.width(6.dp))
+                        TossBadge(text = "보호자 전용", isGreen = false, isHighlighted = true)
+                        Spacer(modifier = Modifier.width(8.dp))
 
                         // My Page Icon Button
                         IconButton(
@@ -382,14 +354,14 @@ fun HomeScreen(
                         .padding(horizontal = 20.dp, vertical = 16.dp)
                 ) {
                     Text(
-                        text = if (role == UserRole.GUARDIAN) "어떤 돌봄이\n필요하신가요?" else "전문 분야에 맞는\n공고를 수주하세요",
+                        text = "어떤 돌봄이\n필요하신가요?",
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
                         color = TossBlack
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = if (role == UserRole.GUARDIAN) "3분 만에 간편 등록하고 반경 내 맞춤 견적을 비교하세요" else "내 이동 반경 및 전문 자격에 맞는 실시간 요청서",
+                        text = "3분 만에 간편 등록하고 반경 내 맞춤 견적을 비교하세요",
                         style = MaterialTheme.typography.bodyMedium,
                         color = TossGray
                     )
@@ -409,12 +381,8 @@ fun HomeScreen(
                             modifier = Modifier.fillMaxWidth(),
                             backgroundColor = TossSurface,
                             onClick = {
-                                if (role == UserRole.GUARDIAN) {
-                                    viewModel.updateForm { it.copy(careType = careType) }
-                                    onNavigateToRequestForm(careType)
-                                } else {
-                                    onNavigateToRadar()
-                                }
+                                viewModel.updateForm { it.copy(careType = careType) }
+                                onNavigateToRequestForm(careType)
                             }
                         ) {
                             Row(
